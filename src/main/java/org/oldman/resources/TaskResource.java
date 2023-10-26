@@ -9,12 +9,9 @@ import org.instancio.Instancio;
 import org.oldman.entities.Task;
 import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;
-import org.oldman.repositories.TaskRepository;
-import org.oldman.services.TasksService;
+import org.oldman.services.TaskService;
 
 import java.net.URI;
-import java.util.List;
-import java.util.function.Consumer;
 
 import static org.instancio.Select.field;
 import static org.oldman.entities.entityUtils.ServiceOperationUtils.applyFunction;
@@ -23,26 +20,26 @@ import static org.oldman.entities.entityUtils.ServiceOperationUtils.consumeOpera
 @Path("/tasks")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class TaskResource {
+public class TaskResource implements BaseItemResource<Task> {
     @Inject
-    TaskRepository taskRepository;
-
-    @Inject
-    TasksService service;
+    TaskService service;
 
     @GET
-    public List<Task> getAll() {
-        return service.findAllTasks();
+    @Override
+    public Response getAll() {
+        return applyFunction(service, TaskService::findAll);
     }
 
     @GET
     @Path("/{id}")
-    public Response getTaskById(@PathParam("id") Long id) {
-        return applyFunction(service, s -> s.findTaskById(id));
+    @Override
+    public Response getById(@PathParam("id") Long id) {
+        return applyFunction(service, s -> s.findById(id));
     }
 
     @POST
     @Transactional
+    @Override
     public Response create(@QueryParam("g") Boolean generate, Task task) {
         if (generate != null && generate) {
             task = Instancio
@@ -54,7 +51,7 @@ public class TaskResource {
         /*consumeOperation(service, s -> s.saveTask(task), Response
                 .created(URI.create("/tasks/" + task.getId()))
                 .build());*/
-        service.saveTask(task);
+        service.save(task);
         return Response
                 .created(URI.create("/tasks/" + task.getId()))
                 .build();
@@ -63,6 +60,7 @@ public class TaskResource {
     @PUT
     @Path("/{id}")
     @Transactional
+    @Override
     public Response update(@PathParam("id") Long id, @QueryParam("g") Boolean generate, Task task) {
         if (generate != null && generate) {
             task = Instancio
@@ -72,7 +70,7 @@ public class TaskResource {
         }
 //      return consumeOperation(service, s -> s.updateTask(id, task));
         try {
-            service.updateTask(id, task);
+            service.update(id, task);
         } catch (NotFoundException e) {
             return Response
                     .status(
@@ -96,8 +94,9 @@ public class TaskResource {
     @DELETE
     @Path("/{id}")
     @Transactional
+    @Override
     public Response delete(@PathParam("id") Long id) {
-        return consumeOperation(service, s -> s.deleteTaskById(id), Response.Status.NO_CONTENT);
+        return consumeOperation(service, s -> s.delete(id), Response.Status.NO_CONTENT);
     }
 
     @GET
@@ -106,19 +105,19 @@ public class TaskResource {
             @PathParam("id") Long listId,
             @QueryParam("category") TaskCategory category,
             @QueryParam("priority") Priority priority) {
-        return applyFunction(service, s -> s.findAllTasksByList(listId, category, priority));
+        return applyFunction(service, s -> s.findAllByList(listId, category, priority));
     }
 
     @GET
     @Path("/search/{name}")
-    public Response search(String name) {
+    public Response searchByName(String name) {
         // show page with message
-        return applyFunction(service, s -> s.findTaskByName(name));
+        return applyFunction(service, s -> s.findByName(name));
     }
 
     @GET
     @Path("/count")
-    public Long count() {
-        return taskRepository.count();
+    public Response count() {
+        return applyFunction(service, TaskService::count);
     }
 }

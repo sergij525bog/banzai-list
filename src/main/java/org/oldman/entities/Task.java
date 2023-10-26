@@ -21,7 +21,7 @@ import java.util.Set;
 @EqualsAndHashCode
 @Table(name = "tasks")
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
-public class Task {
+public class Task implements Item {
     @Id
     @GeneratedValue
     private Long id;

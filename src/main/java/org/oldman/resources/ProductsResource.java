@@ -6,7 +6,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.instancio.Instancio;
 import org.oldman.entities.Product;
-import org.oldman.entities.ProductList;
 import org.oldman.services.ProductService;
 
 import java.net.URI;
@@ -16,24 +15,27 @@ import static org.oldman.entities.entityUtils.ServiceOperationUtils.applyFunctio
 import static org.oldman.entities.entityUtils.ServiceOperationUtils.consumeOperation;
 
 @Path("/products")
-public class ProductsResource {
+public class ProductsResource implements BaseItemResource<Product> {
     @Inject
     ProductService service;
 
     @GET
+    @Override
     public Response getAll() {
         return applyFunction(service, ProductService::findAll);
     }
 
     @GET
     @Path("/{id}")
+    @Override
     public Response getById(@PathParam("id") Long id) {
         return applyFunction(service, s -> s.findById(id));
     }
 
     @POST
     @Transactional
-    public Response addProduct(Product product, @QueryParam("g") Boolean generate) {
+    @Override
+    public Response create(@QueryParam("g") Boolean generate, Product product) {
         if (generate != null && generate) {
             product = Instancio.of(Product.class)
                     .ignore(field(Product.class, "id"))
@@ -48,6 +50,7 @@ public class ProductsResource {
     @PUT
     @Path("/{id}")
     @Transactional
+    @Override
     public Response update(@PathParam("id") Long id, @QueryParam("g") Boolean generate, Product product) {
         if (generate != null && generate) {
             product = Instancio
@@ -72,6 +75,7 @@ public class ProductsResource {
     @DELETE
     @Path("/{id}")
     @Transactional
+    @Override
     public Response delete(@PathParam("id") Long id) {
         return consumeOperation(service, s -> s.deleteById(id));
     }

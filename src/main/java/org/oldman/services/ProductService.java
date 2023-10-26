@@ -15,7 +15,7 @@ public class ProductService {
     ProductRepository productRepository;
 
     @Inject
-    ListWithProductRepository listWithProductRepository;
+    ListWithProductRepository joinTableRepository;
 
     public List<Product> findAll() {
         return productRepository.findAllProducts();
@@ -42,7 +42,7 @@ public class ProductService {
     @Transactional
     public void deleteById(Long id) {
         final Product entity = findById(id);
-        listWithProductRepository.deleteAllByProduct(id);
+        joinTableRepository.deleteAllByProduct(id);
         productRepository.delete(entity);
     }
 }

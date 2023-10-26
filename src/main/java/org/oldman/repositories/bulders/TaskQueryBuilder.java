@@ -8,7 +8,7 @@ class TaskQueryBuilder {
     private Map<String, Object> params = new HashMap<>();
 
     public static StringBuilder getBasicQuery() {
-        queryStringBuilder.append("select t from ItemList l ").append("join l.tasks t");
+        queryStringBuilder.append("select t from TaskList l ").append("join l.tasks t");
         return queryStringBuilder;
     }
 

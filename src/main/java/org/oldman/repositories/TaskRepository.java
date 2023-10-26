@@ -51,7 +51,7 @@ public class TaskRepository implements PanacheRepository<Task> {
     public List<Task> getAllTasksByListId(long listId) {
         return list("select t from Task t " +
                 "join t.listWithTasks lt " +
-                "join lt.itemList l " +
+                "join lt.taskList l " +
                 "where l.id = :listId",
                 Parameters.with("listId", listId));
     }
@@ -59,7 +59,7 @@ public class TaskRepository implements PanacheRepository<Task> {
     public List<Task> getAllTasksByListIdAndPriority(long listId, Priority priority) {
         return list("select t from Task t " +
                         "join fetch t.listWithTasks lt " +
-                        "join lt.itemList l " +
+                        "join lt.taskList l " +
                         "where l.id = :listId and " +
                         "lt.priority = :priority",
                 Parameters.with("listId", listId)
@@ -69,7 +69,7 @@ public class TaskRepository implements PanacheRepository<Task> {
     public List<Task> getAllTasksByListIdAndCategory(long listId, TaskCategory category) {
         return list("select t from Task t " +
                         "join fetch t.listWithTasks lt " +
-                        "join lt.itemList l " +
+                        "join lt.taskList l " +
                         "where l.id = :listId and " +
                         "lt.taskCategory = :category",
                 Parameters.with("listId", listId)
@@ -80,7 +80,7 @@ public class TaskRepository implements PanacheRepository<Task> {
     public List<Task> getAllTasksByListIdAndCategoryAndPriority(long listId, TaskCategory category, Priority priority) {
         return list("select t from Task t " +
                         "join fetch t.listWithTasks lt " +
-                        "join lt.itemList l " +
+                        "join lt.taskList l " +
                         "where l.id = :listId and " +
                         "lt.taskCategory = :category and " +
                         "lt.priority = :priority",
@@ -93,7 +93,7 @@ public class TaskRepository implements PanacheRepository<Task> {
     public Task findByIdJoinFetchItemList(long id) {
         final Task task = find("select t from Task t " +
                         "left join fetch t.listWithTasks lt " +
-                        "left join fetch lt.itemList l " +
+                        "left join fetch lt.taskList l " +
                         "where t.id = :taskId",
                 Parameters.with("taskId", id))
                 .firstResult();

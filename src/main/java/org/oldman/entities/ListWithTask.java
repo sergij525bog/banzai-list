@@ -34,7 +34,7 @@ public class ListWithTask {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "list_id")
-    private ItemList itemList;
+    private TaskList taskList;
 
     private String description;
 
@@ -61,7 +61,7 @@ public class ListWithTask {
     public String toString() {
         return "ListWithTask{" +
                 "task=" + task +
-                ", itemList=" + itemList +
+                ", taskList=" + taskList +
                 ", description='" + description + '\'' +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +

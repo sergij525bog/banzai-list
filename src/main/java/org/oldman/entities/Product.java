@@ -15,7 +15,7 @@ import java.util.Set;
 @EqualsAndHashCode
 @Entity
 @Table(name = "products")
-public class Product {
+public class Product implements Item {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)

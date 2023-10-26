@@ -16,24 +16,27 @@ import static org.oldman.entities.entityUtils.ServiceOperationUtils.applyFunctio
 import static org.oldman.entities.entityUtils.ServiceOperationUtils.consumeOperation;
 
 @Path("/product-lists")
-public class ProductListResource {
+public class ProductListResource implements BaseItemListResource<ProductList> {
     @Inject
     ProductListService service;
 
     @GET
+    @Override
     public Response getAll() {
         return applyFunction(service, ProductListService::findAll);
     }
 
     @GET
     @Path("/{id}")
-    public Response getProductById(@PathParam("id") Long id) {
+    @Override
+    public Response getById(@PathParam("id") Long id) {
         return applyFunction(service, s -> s.findProductListByIdJoinFetchProduct(id));
     }
 
     @POST
     @Transactional
-    public Response createProductList(ProductList list, @QueryParam("g") Boolean generate) {
+    @Override
+    public Response create(@QueryParam("g") Boolean generate, ProductList list) {
         if (generate != null && generate) {
             list = Instancio.of(ProductList.class)
                     .ignore(field(ProductList.class, "id"))
@@ -48,47 +51,51 @@ public class ProductListResource {
     @PUT
     @Path("/{id}")
     @Transactional
-    public Response updateProductList(@PathParam("id") Long id, ProductList productList) {
+    @Override
+    public Response update(@PathParam("id") Long id, @QueryParam("g") Boolean generate, ProductList productList) {
         return consumeOperation(service, s -> s.updateProductList(id, productList));
     }
 
     @DELETE
     @Path("/{id}")
     @Transactional
-    public Response deleteProductList(@PathParam("id") Long id) {
+    @Override
+    public Response delete(@PathParam("id") Long id) {
         return consumeOperation(service, s -> s.deleteProductList(id));
     }
 
     @PUT
-    @Path("/{id}/add-product/{productId}")
+    @Path("/{id}/add-product/{itemId}")
     @Transactional
-    public Response addProduct(@PathParam("id") long listId, @PathParam("productId") long productId) {
-        return consumeOperation(service, s -> s.addProduct(listId, productId));
+    @Override
+    public Response addItem(@PathParam("id") Long listId, @PathParam("itemId") Long itemId) {
+        return consumeOperation(service, s -> s.addProduct(listId, itemId));
     }
 
     // TODO: add redirect
     @PUT
-    @Path("/{id}/delete-product/{productId}")
+    @Path("/{id}/delete-product/{itemId}")
     @Transactional
-    public Response deleteProduct(@PathParam("id") long listId, @PathParam("productId") long productId) {
+    @Override
+    public Response deleteItem(@PathParam("id") Long listId, @PathParam("itemId") Long itemId) {
         return consumeOperation(
                 service,
-                s -> s.deleteProductFromList(listId, productId),
+                s -> s.deleteProductFromList(listId, itemId),
                 Response.Status.NO_CONTENT
         );
     }
 
     @PATCH
     @Path("/{id}/clear")
-    public Response clearList(@PathParam("id") long listId) {
+    public Response clearList(@PathParam("id") Long listId) {
         return consumeOperation(service, s -> s.clearList(listId));
     }
 
     @PATCH
     @Path("/{listId}/{productId}/priority")
     public Response changePriority(
-            @PathParam("listId") long listId,
-            @PathParam("productId") long productId,
+            @PathParam("listId") Long listId,
+            @PathParam("productId") Long productId,
             Priority priority) {
         return consumeOperation(service, s -> s.changeProductPriority(listId, productId, priority));
     }

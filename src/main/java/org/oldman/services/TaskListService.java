@@ -6,13 +6,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
-import org.oldman.entities.ItemList;
+import org.oldman.entities.TaskList;
 import org.oldman.entities.ListWithTask;
 import org.oldman.entities.Task;
 import org.oldman.entities.entityUtils.EntityValidator;
 import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;
-import org.oldman.repositories.ItemListRepository;
+import org.oldman.repositories.TaskListRepository;
 import org.oldman.repositories.ListWithTaskRepository;
 import org.oldman.repositories.TaskRepository;
 
@@ -22,9 +22,9 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 @ApplicationScoped
-public class ItemListService {
+public class TaskListService {
     @Inject
-    ItemListRepository itemListRepository;
+    TaskListRepository taskListRepository;
 
     @Inject
     TaskRepository taskRepository;
@@ -33,25 +33,21 @@ public class ItemListService {
     ListWithTaskRepository joinTableRepository;
 
 
-    public List<ItemList> findAllItemListsWithTasksAndProducts() {
-        return itemListRepository.findAllTItemListsJoinFetchTaskAndProduct();
+    public List<TaskList> findAllTaskListsFetchTask() {
+        return taskListRepository.findAllTaskListsFetchTask();
     }
 
-    public ItemList findItemListJoinFetchTaskAndProductById(long id) {
-        return itemListRepository.findItemListJoinFetchTaskAndProductById(id);
+    public TaskList findByIdFetchTask(Long id) {
+        return taskListRepository.findByIdFetchTask(id);
     }
 
-    public ItemList findItemListsJoinFetchTask(long id) {
-        return itemListRepository.findItemListsJoinFetchTask(id);
-    }
-
-    public void saveItemList(ItemList list) {
+    public void saveItemList(TaskList list) {
          EntityValidator.validateEntityBeforeSave(list);
-        itemListRepository.persist(list);
+        taskListRepository.persist(list);
     }
 
-    public void addTaskToList(long listId, long taskId) {
-        final ItemList list = findItemListsJoinFetchTask(listId);
+    public void addTaskToList(Long listId, Long taskId) {
+        final TaskList list = findByIdFetchTask(listId);
         final Task task = taskRepository.findTaskById(taskId);
 
         final boolean listContainsTask = list
@@ -69,35 +65,36 @@ public class ItemListService {
 
         final ListWithTask listWithTask = new ListWithTask();
         listWithTask.setTask(task);
-        listWithTask.setItemList(list);
+        listWithTask.setTaskList(list);
         joinTableRepository.persist(listWithTask);
     }
 
-    public void deleteTaskFromList(long listId, long taskId) {
+    public void deleteTaskFromList(Long listId, Long taskId) {
         joinTableRepository.delete(getListWithTask(listId, taskId));
     }
 
-    public int findAllTItemListsJoinFetchTaskAndProductCount() {
-        return itemListRepository.findAllTItemListsJoinFetchTaskAndProduct().size();
+    public int findItemListsCount() {
+        return taskListRepository.findAllTaskListsFetchTask().size();
     }
 
-    public int getTaskCount(long id) {
-        return itemListRepository
+//    TODO: replace with db request to get count
+    public int getTaskCount(Long id) {
+        return taskListRepository
                 .findItemListByIdFetchTask(id)
                 .getListWithTasks()
                 .size();
     }
 
     @Transactional
-    public void clearList(long listId) {
+    public void clearList(Long listId) {
         //        TODO: this line is only for validation list is in db. It should be replaced with less expensive operation
-        final ItemList itemList = itemListRepository.findItemListByIdFetchTask(listId);
+        final TaskList taskList = taskListRepository.findItemListByIdFetchTask(listId);
 
         joinTableRepository.deleteAllByItemList(listId);
     }
 
     @Transactional
-    public void changeTaskPriority(long listId, long taskId, Priority priority) {
+    public void changeTaskPriority(Long listId, Long taskId, Priority priority) {
         throwConflictExceptionByPredicate(priority, Objects::isNull, "You don't pass a new priority");
 
         final ListWithTask listWithTask = getListWithTask(listId, taskId);
@@ -105,15 +102,15 @@ public class ItemListService {
     }
 
     @Transactional
-    public void changeTaskCategory(long listId, long taskId, TaskCategory category) {
+    public void changeTaskCategory(Long listId, Long taskId, TaskCategory category) {
         throwConflictExceptionByPredicate(category, Objects::isNull, "You don't pass a new category");
 
         final ListWithTask listWithTask = getListWithTask(listId, taskId);
         listWithTask.setTaskCategory(category);
     }
 
-    private ListWithTask getListWithTask(long listId, long taskId) {
-        final ItemList list = findItemListsJoinFetchTask(listId);
+    private ListWithTask getListWithTask(Long listId, Long taskId) {
+        final TaskList list = findByIdFetchTask(listId);
         final Task task = taskRepository.findTaskById(taskId);
 
         final Optional<ListWithTask> listWithTask = list
@@ -134,5 +131,18 @@ public class ItemListService {
 //            throw new ConflictException(errorMessage);
             throw new NotFoundException(errorMessage);
         }
+    }
+
+    public void update(Long id, TaskList taskList) {
+        final TaskList entity = taskListRepository.findById(id);
+        //        EntityValidator.validateEntityBeforeSave(taskList);
+
+        entity.setName(taskList.getName());
+    }
+
+    public void deleteList(Long id) {
+        final TaskList productList = findByIdFetchTask(id);
+        joinTableRepository.deleteAllByTaskList(id);
+        taskListRepository.delete(productList);
     }
 }

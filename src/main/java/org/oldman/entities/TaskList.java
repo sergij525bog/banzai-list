@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "product_lists")
+@Table(name = "task_lists")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class ProductList implements ItemList {
+public class TaskList implements ItemList {
     @Id
     @GeneratedValue
     private Long id;
@@ -29,8 +29,8 @@ public class ProductList implements ItemList {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "productList")
-    Set<ListWithProduct> listWithProducts = new HashSet<>();
+    @OneToMany(mappedBy = "taskList")
+    Set<ListWithTask> listWithTasks = new HashSet<>();
 
 //    public TaskList(String name) {
 //        setName(name);
@@ -45,10 +45,10 @@ public class ProductList implements ItemList {
     }
 
     @JsonIgnore
-    public List<Product> getProducts() {
-        return listWithProducts
+    public List<Task> getTasks() {
+        return listWithTasks
                 .stream()
-                .map(ListWithProduct::getProduct)
+                .map(ListWithTask::getTask)
                 .collect(Collectors.toList());
     }
 
@@ -74,10 +74,10 @@ public class ProductList implements ItemList {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(id + " " + name);
-        if (getProducts().size() > 0) {
-            builder.append("\nProducts:\n--------------------\n");
+        if (getTasks().size() > 0) {
+            builder.append("\nTasks:\n--------------------\n");
         }
-        if (getProducts().size() > 0) {
+        if (getTasks().size() > 0) {
             builder.append("--------------------");
         }
         return builder.toString();

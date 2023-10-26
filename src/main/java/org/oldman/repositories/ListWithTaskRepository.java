@@ -10,7 +10,7 @@ import org.oldman.entities.entityUtils.EntityValidator;
 public class ListWithTaskRepository implements PanacheRepository<ListWithTask> {
     public ListWithTask findByListAndTask(long listId, long taskId) {
         final ListWithTask list = find("select lt from ListWithTask lt " +
-                        "where lt.itemList.id = :listId " +
+                        "where lt.taskList.id = :listId " +
                         "and lt.task.id = :taskId",
                 Parameters
                         .with("listId", listId)
@@ -30,7 +30,13 @@ public class ListWithTaskRepository implements PanacheRepository<ListWithTask> {
 
     public void deleteAllByItemList(long listId) {
         delete("delete from ListWithTask lt " +
-                "where lt.itemList.id = :listId",
+                "where lt.taskList.id = :listId",
                 Parameters.with("listId", listId));
+    }
+
+    public void deleteAllByTaskList(Long taskListId) {
+        delete("delete from ListWithTask lt " +
+                        "where lt.taskList.id = :taskListId",
+                Parameters.with("taskListId", taskListId));
     }
 }

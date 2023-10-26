@@ -9,7 +9,7 @@ import org.oldman.entities.ListWithProduct;
 public class ListWithProductRepository implements PanacheRepository<ListWithProduct> {
     public void deleteAllByProductList(Long productListId) {
         delete("delete from ListWithProduct lp " +
-                "where lp.productList = :productListId",
+                "where lp.productList.id = :productListId",
                 Parameters.with("productListId", productListId));
     }
 

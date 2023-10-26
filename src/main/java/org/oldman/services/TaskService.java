@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.oldman.entities.Task;
-import org.oldman.entities.entityUtils.EntityValidator;
 import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;
 import org.oldman.repositories.ListWithTaskRepository;
@@ -13,29 +12,29 @@ import org.oldman.repositories.TaskRepository;
 import java.util.List;
 
 @ApplicationScoped
-public class TasksService {
+public class TaskService {
     @Inject
     TaskRepository taskRepository;
 
     @Inject
     ListWithTaskRepository joinTableRepository;
 
-    public List<Task> findAllTasks() {
+    public List<Task> findAll() {
         return taskRepository.findAllTasks();
     }
 
-    public Task findTaskById(Long id) {
+    public Task findById(Long id) {
         return taskRepository.findTaskById(id);
     }
 
     @Transactional
-    public void saveTask(Task task) {
+    public void save(Task task) {
 //        EntityValidator.validateEntityBeforeSave(task);
         taskRepository.persist(task);
     }
 
-    public void updateTask(Long id, Task task) {
-        Task entity = findTaskById(id);
+    public void update(Long id, Task task) {
+        Task entity = findById(id);
 
         //        EntityValidator.validateEntityBeforeSave(task);
         if (task == null || task.getName() == null || task.getName().isBlank()) {
@@ -49,14 +48,14 @@ public class TasksService {
     }
 
 //    TODO: test it
-    public void deleteTaskById(Long id) {
+    public void delete(Long id) {
         Task task = findByIdJoinFetchItemList(id);
 
         joinTableRepository.deleteByTask(id);
         taskRepository.delete(task);
     }
 
-    public List<Task> findAllTasksByList(
+    public List<Task> findAllByList(
             Long listId,
             TaskCategory category,
             Priority priority) {
@@ -72,7 +71,11 @@ public class TasksService {
         return taskRepository.getAllTasksByListId(listId);
     }
 
-    public Task findTaskByName(String name) {
+    public Task findByName(String name) {
         return taskRepository.findTaskByName(name);
+    }
+
+    public Long count() {
+        return taskRepository.count();
     }
 }

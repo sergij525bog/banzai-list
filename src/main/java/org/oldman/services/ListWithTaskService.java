@@ -26,7 +26,7 @@ public class ListWithTaskService {
         listWithTask.setDescription(description);
     }
 
-    public ListWithTask findByListAndTask(long listId, long taskId) {
+    public ListWithTask findByListAndTask(Long listId, Long taskId) {
         return listWithTaskRepository.findByListAndTask(listId, taskId);
     }
 }
