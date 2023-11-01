@@ -74,10 +74,10 @@ public class ProductList implements ItemList {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(id + " " + name);
-        if (getProducts().size() > 0) {
+        if (!getProducts().isEmpty()) {
             builder.append("\nProducts:\n--------------------\n");
         }
-        if (getProducts().size() > 0) {
+        if (!getProducts().isEmpty()) {
             builder.append("--------------------");
         }
         return builder.toString();

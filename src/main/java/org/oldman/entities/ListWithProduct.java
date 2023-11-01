@@ -26,12 +26,12 @@ public class ListWithProduct {
     @Column(nullable = false)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id")
     private ProductList productList;
 
@@ -51,21 +51,24 @@ public class ListWithProduct {
     @Column(nullable = false)
     private boolean required = false;
 
+    @NotNull
+    @Column
+    private boolean done = false;
+
     @Override
     public String toString() {
-        return "Item{id=" +
-                id +
-                ", name='" +
-                product.getName() +
-                '\'' +
-                ", count=" +
-                count +
-                ", retrieved=" +
-                retrieved +
-                ", weight=" +
-                weight +
-                ", required=" +
-                required +
+        return "ListWithProduct{" +
+                "id=" + id +
+                ", product=" + product +
+                ", productList=" + productList +
+                ", count=" + count +
+                ", endDate=" + endDate +
+                ", priority=" + priority +
+                ", retrieved=" + retrieved +
+                ", weight=" + weight +
+                ", required=" + required +
+                ", done=" + done +
                 '}';
     }
 }
+

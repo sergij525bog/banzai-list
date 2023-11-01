@@ -1,4 +1,4 @@
 package org.oldman.entities;
 
-public interface Item {
+public interface Item extends DataObject {
 }

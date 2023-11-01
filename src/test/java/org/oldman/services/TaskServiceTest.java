@@ -1,17 +1,20 @@
 package org.oldman.services;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.oldman.entities.Task;
+import org.oldman.repositories.TaskRepository;
 
-import static org.instancio.Select.field;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @QuarkusTest
 public class TaskServiceTest {
+
+    @InjectMock
+    TaskRepository repository;
 
     @Inject
     TaskService service;
@@ -20,13 +23,13 @@ public class TaskServiceTest {
     public void itShouldRejectSavingTaskWithNullOrWhitespaceName() {
         Task task = new Task();
         task.setName(null);
-        assertThrows(RuntimeException.class, () -> service.save(task));
+        assertThrows(IllegalArgumentException.class, () -> service.save(task));
         
         task.setName(" ");
-        assertThrows(RuntimeException.class, () -> service.save(task));
+        assertThrows(IllegalArgumentException.class, () -> service.save(task));
         
         task.setName("\t\n");
-        assertThrows(RuntimeException.class, () -> service.save(task));
+        assertThrows(IllegalArgumentException.class, () -> service.save(task));
     }
 
     @Test
@@ -35,11 +38,10 @@ public class TaskServiceTest {
         task.setName("Some test name");
 
         assertDoesNotThrow(() -> service.save(task));
-        System.out.println(task.getId());
     }
 
     @Test
     public void itShouldThrowIfTaskNotFound() {
-        assertThrows(NotFoundException.class, () -> service.findByIdJoinFetchItemList(-1L));
+        assertThrows(RuntimeException.class, () -> service.findByIdJoinFetchItemList(-1L));
     }
 }

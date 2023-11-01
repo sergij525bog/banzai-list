@@ -2,7 +2,6 @@ package org.oldman.services;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.NotFoundException;
 import org.oldman.entities.ListWithTask;
 import org.oldman.repositories.ListWithTaskRepository;
 

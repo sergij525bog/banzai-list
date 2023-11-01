@@ -27,12 +27,12 @@ public class ListWithTask {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private Task task;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id")
     private TaskList taskList;
 
@@ -46,6 +46,7 @@ public class ListWithTask {
 
     private Priority priority = Priority.LOW;
     private TaskCategory taskCategory = TaskCategory.NONE;
+//    private boolean done = false;
 
     // for cycled tasks; if task isn't cycled, then period is 0
 //    @Min(value = 0, message = "period cannot be less than 0")
@@ -60,14 +61,16 @@ public class ListWithTask {
     @Override
     public String toString() {
         return "ListWithTask{" +
-                "task=" + task +
+                "id=" + id +
+                ", task=" + task +
                 ", taskList=" + taskList +
                 ", description='" + description + '\'' +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
                 ", priority=" + priority +
                 ", taskCategory=" + taskCategory +
-                ", calendarPlanning=" + calendarPlanning +
+//                ", done=" + done +
+//                ", calendarPlanning=" + calendarPlanning +
                 '}';
     }
 }

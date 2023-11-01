@@ -3,14 +3,16 @@ package org.oldman.services;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import org.oldman.entities.*;
+import org.oldman.entities.ListWithProduct;
+import org.oldman.entities.Product;
+import org.oldman.entities.ProductList;
 import org.oldman.entities.enums.Priority;
+import org.oldman.entities.enums.ProductCategory;
 import org.oldman.repositories.ListWithProductRepository;
 import org.oldman.repositories.ProductListRepository;
 import org.oldman.repositories.ProductRepository;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -118,5 +120,27 @@ public class ProductListService {
             throw new IllegalArgumentException("List does not contain product with id " + productId);
         }
         return listWithProduct.get();
+    }
+
+    public void changeProductCategory(Long listId, Long listWithProductId, ProductCategory category) {
+        if (category == null) {
+            throw new IllegalArgumentException("You don't pass a new category");
+        }
+
+        final ListWithProduct listWithProduct = getListWithProduct(listId, listWithProductId);
+        listWithProduct.getProduct().setProductCategory(category);
+    }
+
+    public void changeProductStatus(Long listId, Long listWithProductId) {
+        final ListWithProduct listWithTask = getListWithProduct(listId, listWithProductId);
+        listWithTask.setDone(!listWithTask.isDone());
+    }
+
+    @Transactional
+    public void moveToOtherList(Long listId, Long listWithProductId, Long newListId) {
+        final ListWithProduct listWithProduct = getListWithProduct(listId, listWithProductId);
+        final ProductList newList = productListRepository.findProductListByIdJoinFetchProduct(newListId);
+        listWithProduct.setProductList(newList);
+        newList.getListWithProducts().add(listWithProduct);
     }
 }

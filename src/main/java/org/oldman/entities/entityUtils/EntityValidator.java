@@ -5,8 +5,6 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.ws.rs.NotFoundException;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
@@ -27,9 +25,9 @@ public class EntityValidator {
         Set<ConstraintViolation<T>> constraintViolations = validator.validate(entity);
 
         //Show errors
-        if (constraintViolations.size() > 0) {
+        if (!constraintViolations.isEmpty()) {
             for (ConstraintViolation<T> violation : constraintViolations) {
-                System.out.println(violation.getMessage());
+                throw new IllegalArgumentException(violation.getMessage());
             }
         } else {
             System.out.println("Valid Object");

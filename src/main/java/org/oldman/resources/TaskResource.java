@@ -1,5 +1,6 @@
 package org.oldman.resources;
 
+import io.quarkus.panache.common.Sort;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -12,6 +13,7 @@ import org.oldman.entities.enums.TaskCategory;
 import org.oldman.services.TaskService;
 
 import java.net.URI;
+import java.util.List;
 
 import static org.instancio.Select.field;
 import static org.oldman.entities.entityUtils.ServiceOperationUtils.applyFunction;
@@ -27,6 +29,8 @@ public class TaskResource implements BaseItemResource<Task> {
     @GET
     @Override
     public Response getAll() {
+//        service.checkExists();
+//        System.out.println("Get all");
         return applyFunction(service, TaskService::findAll);
     }
 
@@ -104,8 +108,23 @@ public class TaskResource implements BaseItemResource<Task> {
     public Response getTasksByList(
             @PathParam("id") Long listId,
             @QueryParam("category") TaskCategory category,
-            @QueryParam("priority") Priority priority) {
-        return applyFunction(service, s -> s.findAllByList(listId, category, priority));
+            @QueryParam("priority") Priority priority,
+//            @QueryParam("done") Boolean done,
+            @QueryParam("sortBy") List<String> sortBy,
+            @QueryParam("sortOrder") String sortOrder
+    ) {
+//        System.out.println(sortOrder.toString());
+//        sortBy.forEach(System.out::println);
+        return applyFunction(
+                service,
+                s -> s.findAllByList(
+                        listId,
+                        category,
+                        priority,
+                        null,
+                        sortBy,
+                        sortOrder
+                ));
     }
 
     @GET

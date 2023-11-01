@@ -6,10 +6,14 @@ import jakarta.transaction.Transactional;
 import org.oldman.entities.Task;
 import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;
+import org.oldman.models.TaskModel;
 import org.oldman.repositories.ListWithTaskRepository;
 import org.oldman.repositories.TaskRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class TaskService {
@@ -55,20 +59,20 @@ public class TaskService {
         taskRepository.delete(task);
     }
 
-    public List<Task> findAllByList(
+    public List<TaskModel> findAllByList(
             Long listId,
             TaskCategory category,
-            Priority priority) {
-        if (category != null && priority != null) {
-            return taskRepository.getAllTasksByListIdAndCategoryAndPriority(listId, category, priority);
-        }
-        if (category != null) {
-            return taskRepository.getAllTasksByListIdAndCategory(listId, category);
-        }
-        if (priority != null) {
-            return taskRepository.getAllTasksByListIdAndPriority(listId, priority);
-        }
-        return taskRepository.getAllTasksByListId(listId);
+            Priority priority,
+            Boolean done,
+            List<String> sortBy,
+            String sortOrder) {
+        Map<String, Object> filters = new HashMap<>();
+        filters.put("taskCategory", category);
+        filters.put("priority", priority);
+//        filters.put("done", done);
+
+        Stream<Task> taskStream = taskRepository.getAllByListWithFiltersAsStream(listId, filters, sortBy, sortOrder);
+        return TaskModel.toModelList(taskStream);
     }
 
     public Task findByName(String name) {
@@ -77,5 +81,12 @@ public class TaskService {
 
     public Long count() {
         return taskRepository.count();
+    }
+
+    public void checkExists() {
+        Long id = 1L;
+        taskRepository.checkExistsById(id);
+        System.out.println("Check with full select");
+//        taskRepository.checkExistsByIdWithFullSelect(id);
     }
 }

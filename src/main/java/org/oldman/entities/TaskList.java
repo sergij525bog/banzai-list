@@ -74,10 +74,10 @@ public class TaskList implements ItemList {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(id + " " + name);
-        if (getTasks().size() > 0) {
+        if (!getTasks().isEmpty()) {
             builder.append("\nTasks:\n--------------------\n");
         }
-        if (getTasks().size() > 0) {
+        if (!getTasks().isEmpty()) {
             builder.append("--------------------");
         }
         return builder.toString();

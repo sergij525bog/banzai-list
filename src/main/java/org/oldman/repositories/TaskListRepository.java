@@ -3,11 +3,11 @@ package org.oldman.repositories;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.NotFoundException;
 import org.oldman.entities.TaskList;
 import org.oldman.entities.entityUtils.EntityValidator;
 
 import java.util.List;
-import java.util.Optional;
 
 @ApplicationScoped
 public class TaskListRepository implements PanacheRepository<TaskList> {
@@ -41,11 +41,14 @@ public class TaskListRepository implements PanacheRepository<TaskList> {
         return EntityValidator.returnOrThrowIfNull(list, "There is no list with id " + listId);
     }
 
-    public TaskList findItemListByIdWithoutAnyJoin(long listId) {
-        final TaskList list = find("select l from TaskList l " +
-                        "where l.id = :listId ",
-                Parameters.with("listId", listId)
-        ).firstResult();
-        return EntityValidator.returnOrThrowIfNull(list, "There is no list with id " + listId);
+    public void checkExistsById(Long id) {
+        Integer count = find("select count(*) from (select lt from TaskList lt where id = :id limit 1)",
+                Parameters.with("id", id))
+                .project(Integer.class)
+                .firstResult();
+
+        if (count > 0) {
+            throw new NotFoundException("There is no list with id " + id);
+        }
     }
 }

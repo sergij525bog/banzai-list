@@ -122,7 +122,13 @@ public class TaskListResource implements BaseItemListResource<TaskList> {
     @GET
     @Path("/{id}/tasks")
     public Response getTasksOfList(@PathParam("id") Long id) {
-        return applyFunction(service, s -> s.findByIdFetchTask(id).getTasks());
+        return applyFunction(service, s -> s.getTaskModels(id));
+    }
+
+    @GET
+    @Path("/{id}/tasks/{listWithTaskId}")
+    public Response getTaskById(@PathParam("id") Long listId, @PathParam("listWithTaskId") Long listWithTaskId) {
+        return applyFunction(service, s -> s.getTaskModel(listId, listWithTaskId));
     }
 
     @PATCH
@@ -133,21 +139,40 @@ public class TaskListResource implements BaseItemListResource<TaskList> {
     }
 
     @PATCH
-    @Path("/{listId}/{taskId}/priority")
+    @Path("/{listId}/tasks/{listWithTaskId}/priority")
     public Response changePriority(
             @PathParam("listId") Long listId,
-            @PathParam("taskId") Long taskId,
+            @PathParam("listWithTaskId") Long listWithTaskId,
             Priority priority) {
-        return consumeOperation(service, s -> s.changeTaskPriority(listId, taskId, priority));
+        return consumeOperation(service, s -> s.changeTaskPriority(listId, listWithTaskId, priority));
     }
 
     @PATCH
-    @Path("/{listId}/{taskId}/category")
+    @Path("/{listId}/tasks/{listWithTaskId}/category")
     public Response changeCategory(
             @PathParam("listId") Long listId,
-            @PathParam("taskId") Long taskId,
+            @PathParam("listWithTaskId") Long listWithTaskId,
             TaskCategory category
     ) {
-        return consumeOperation(service, s -> s.changeTaskCategory(listId, taskId, category));
+        return consumeOperation(service, s -> s.changeTaskCategory(listId, listWithTaskId, category));
+    }
+
+    @PATCH
+    @Path("/{listId}/tasks/{listWithTaskId}/done")
+    public Response changeTaskStatus(
+            @PathParam("listId") Long listId,
+            @PathParam("listWithTaskId") Long listWithTaskId
+    ) {
+        return consumeOperation(service, s -> s.changeTaskStatus(listId, listWithTaskId));
+    }
+
+    @PUT
+    @Path("/{listId}/tasks/{listWithTaskId}/move")
+    public Response moveToOtherList(
+            @PathParam("listId") Long listId,
+            @PathParam("listWithTaskId") Long listWithTaskId,
+            @QueryParam("newListId") Long newListId
+    ) {
+        return consumeOperation(service, s -> s.moveToOtherList(listId, listWithTaskId, newListId));
     }
 }

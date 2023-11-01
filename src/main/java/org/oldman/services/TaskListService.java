@@ -6,14 +6,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
-import org.oldman.entities.TaskList;
 import org.oldman.entities.ListWithTask;
 import org.oldman.entities.Task;
+import org.oldman.entities.TaskList;
 import org.oldman.entities.entityUtils.EntityValidator;
 import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;
-import org.oldman.repositories.TaskListRepository;
+import org.oldman.models.TaskModel;
 import org.oldman.repositories.ListWithTaskRepository;
+import org.oldman.repositories.TaskListRepository;
 import org.oldman.repositories.TaskRepository;
 
 import java.util.List;
@@ -74,7 +75,7 @@ public class TaskListService {
     }
 
     public int findItemListsCount() {
-        return taskListRepository.findAllTaskListsFetchTask().size();
+        return taskListRepository.findAllLists().size();
     }
 
 //    TODO: replace with db request to get count
@@ -87,15 +88,16 @@ public class TaskListService {
 
     @Transactional
     public void clearList(Long listId) {
-        //        TODO: this line is only for validation list is in db. It should be replaced with less expensive operation
-        final TaskList taskList = taskListRepository.findItemListByIdFetchTask(listId);
+        taskListRepository.checkExistsById(listId);
 
         joinTableRepository.deleteAllByItemList(listId);
     }
 
     @Transactional
     public void changeTaskPriority(Long listId, Long taskId, Priority priority) {
-        throwConflictExceptionByPredicate(priority, Objects::isNull, "You don't pass a new priority");
+        if (priority == null) {
+            throw new IllegalArgumentException("You don't pass a new priority");
+        }
 
         final ListWithTask listWithTask = getListWithTask(listId, taskId);
         listWithTask.setPriority(priority);
@@ -103,7 +105,9 @@ public class TaskListService {
 
     @Transactional
     public void changeTaskCategory(Long listId, Long taskId, TaskCategory category) {
-        throwConflictExceptionByPredicate(category, Objects::isNull, "You don't pass a new category");
+        if (category == null) {
+            throw new IllegalArgumentException("You don't pass a new category");
+        }
 
         final ListWithTask listWithTask = getListWithTask(listId, taskId);
         listWithTask.setTaskCategory(category);
@@ -126,13 +130,7 @@ public class TaskListService {
         return listWithTask.get();
     }
 
-    private <T> void throwConflictExceptionByPredicate(T object, Predicate<T> predicate, String errorMessage) {
-        if (predicate.test(object)) {
-//            throw new ConflictException(errorMessage);
-            throw new NotFoundException(errorMessage);
-        }
-    }
-
+    @Transactional
     public void update(Long id, TaskList taskList) {
         final TaskList entity = taskListRepository.findById(id);
         //        EntityValidator.validateEntityBeforeSave(taskList);
@@ -140,9 +138,34 @@ public class TaskListService {
         entity.setName(taskList.getName());
     }
 
+    @Transactional
     public void deleteList(Long id) {
         final TaskList productList = findByIdFetchTask(id);
         joinTableRepository.deleteAllByTaskList(id);
         taskListRepository.delete(productList);
+    }
+
+    public List<TaskModel> getTaskModels(Long id) {
+        final List<ListWithTask> listWithTasks = joinTableRepository.findAllByListFetchTask(id);
+        return TaskModel.toModelList(listWithTasks);
+    }
+
+    public TaskModel getTaskModel(Long listId, Long listWithTaskId) {
+        final ListWithTask listWithTask = joinTableRepository.findByIdAndListFetchTask(listId, listWithTaskId);
+        return TaskModel.toModel(listWithTask);
+    }
+
+    @Transactional
+    public void changeTaskStatus(Long listId, Long listWithTaskId) {
+        final ListWithTask listWithTask = joinTableRepository.findByIdAndListFetchTask(listId, listWithTaskId);
+//        listWithTask.setDone(!listWithTask.isDone());
+    }
+
+    @Transactional
+    public void moveToOtherList(Long listId, Long listWithTaskId, Long newListId) {
+        final ListWithTask listWithTask = joinTableRepository.findByIdAndListFetchTask(listId, listWithTaskId);
+        final TaskList newList = taskListRepository.findByIdFetchTask(newListId);
+        listWithTask.setTaskList(newList);
+        newList.getListWithTasks().add(listWithTask);
     }
 }

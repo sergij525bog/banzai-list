@@ -7,6 +7,7 @@ import jakarta.ws.rs.core.Response;
 import org.instancio.Instancio;
 import org.oldman.entities.ProductList;
 import org.oldman.entities.enums.Priority;
+import org.oldman.entities.enums.ProductCategory;
 import org.oldman.services.ProductListService;
 
 import java.net.URI;
@@ -87,16 +88,46 @@ public class ProductListResource implements BaseItemListResource<ProductList> {
 
     @PATCH
     @Path("/{id}/clear")
+    @Override
     public Response clearList(@PathParam("id") Long listId) {
         return consumeOperation(service, s -> s.clearList(listId));
     }
 
     @PATCH
-    @Path("/{listId}/{productId}/priority")
+    @Path("/{listId}/products/{listWithProductId}/priority")
     public Response changePriority(
             @PathParam("listId") Long listId,
-            @PathParam("productId") Long productId,
+            @PathParam("listWithProductId") Long listWithProductId,
             Priority priority) {
-        return consumeOperation(service, s -> s.changeProductPriority(listId, productId, priority));
+        return consumeOperation(service, s -> s.changeProductPriority(listId, listWithProductId, priority));
+    }
+
+    @PATCH
+    @Path("/{listId}/products/{listWithProductId}/category")
+    public Response changeCategory(
+            @PathParam("listId") Long listId,
+            @PathParam("listWithProductId") Long listWithProductId,
+            ProductCategory category
+    ) {
+        return consumeOperation(service, s -> s.changeProductCategory(listId, listWithProductId, category));
+    }
+
+    @PATCH
+    @Path("/listId/products/{listWithProductId}/done")
+    public Response changeStatus(
+            @PathParam("listId") Long listId,
+            @PathParam("listWithProductId") Long listWithProductId
+    ) {
+        return consumeOperation(service, s -> s.changeProductStatus(listId, listWithProductId));
+    }
+
+    @PUT
+    @Path("/{listId}/products/{listWithProductId}/move")
+    public Response moveToOtherList(
+            @PathParam("listId") Long listId,
+            @PathParam("listWithProductId") Long listWithProductId,
+            @QueryParam("newListId") Long newListId
+    ) {
+        return consumeOperation(service, s -> s.moveToOtherList(listId, listWithProductId, newListId));
     }
 }

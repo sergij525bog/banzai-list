@@ -16,6 +16,7 @@ public class ServiceOperationUtils {
             R result = function.apply(service);
             return Response.ok(result).build();
         } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
             return buildFailedResponseByException(e);
         }
     }
