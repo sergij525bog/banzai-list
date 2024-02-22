@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.instancio.Instancio;
+import org.oldman.entities.ListWithProduct;
 import org.oldman.entities.Product;
 import org.oldman.services.ProductService;
 
@@ -15,7 +16,7 @@ import static org.oldman.entities.entityUtils.ServiceOperationUtils.applyFunctio
 import static org.oldman.entities.entityUtils.ServiceOperationUtils.consumeOperation;
 
 @Path("/products")
-public class ProductsResource implements BaseItemResource<Product> {
+public class ProductsResource implements BaseItemResource<Product, ListWithProduct> {
     @Inject
     ProductService service;
 

@@ -6,6 +6,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.instancio.Instancio;
+import org.oldman.entities.Task;
 import org.oldman.entities.TaskList;
 import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;
@@ -110,7 +111,7 @@ public class TaskListResource implements BaseItemListResource<TaskList> {
     @GET
     @Path("/list-count")
     public int getListCount() {
-        return service.findItemListsCount();
+        return service.findTaskListsCount();
     }
 
     @GET
@@ -139,22 +140,14 @@ public class TaskListResource implements BaseItemListResource<TaskList> {
     }
 
     @PATCH
-    @Path("/{listId}/tasks/{listWithTaskId}/priority")
-    public Response changePriority(
+    @Path("/{listId}/tasks/{listWithTaskId}/change")
+    public Response updateTaskParameters(
             @PathParam("listId") Long listId,
             @PathParam("listWithTaskId") Long listWithTaskId,
-            Priority priority) {
-        return consumeOperation(service, s -> s.changeTaskPriority(listId, listWithTaskId, priority));
-    }
-
-    @PATCH
-    @Path("/{listId}/tasks/{listWithTaskId}/category")
-    public Response changeCategory(
-            @PathParam("listId") Long listId,
-            @PathParam("listWithTaskId") Long listWithTaskId,
-            TaskCategory category
-    ) {
-        return consumeOperation(service, s -> s.changeTaskCategory(listId, listWithTaskId, category));
+            @QueryParam("priority") Priority priority,
+            @QueryParam("category") TaskCategory category) {
+        System.out.println(listId + " " + listWithTaskId + " " + priority);
+        return consumeOperation(service, s -> s.changeTaskParameters(listId, listWithTaskId, priority, category));
     }
 
     @PATCH

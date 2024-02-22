@@ -1,17 +1,11 @@
 package org.oldman.models;
 
-import org.oldman.entities.ListWithTask;
-import org.oldman.entities.Task;
 import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class TaskModel {
+public class TaskDto implements Dto{
     private Long id;
     private String name;
     private String description;
@@ -19,10 +13,10 @@ public class TaskModel {
     private LocalDateTime endDate;
     private Priority priority;
     private TaskCategory taskCategory;
-//    private Long taskId;
+    private Long taskId;
     private boolean done;
 
-    public TaskModel() {
+    public TaskDto() {
     }
 
     public Long getId() {
@@ -89,43 +83,12 @@ public class TaskModel {
         this.taskCategory = taskCategory;
     }
 
-//    public Long getTaskId() {
-//        return taskId;
-//    }
-//
-//    public void setTaskId(Long taskId) {
-//        this.taskId = taskId;
-//    }
-
-    public static TaskModel toModel(ListWithTask list) {
-        TaskModel model = new TaskModel();
-        model.setId(list.getId());
-        model.setName(list.getTask().getName());
-        model.setDescription(list.getDescription());
-        model.setStartDate(list.getStartDate());
-        model.setEndDate(list.getEndDate());
-        model.setPriority(list.getPriority());
-        model.setTaskCategory(list.getTaskCategory());
-//        model.setTaskId(list.getTask().getId());
-//        model.setDone(list.isDone());
-
-        return model;
+    public Long getTaskId() {
+        return taskId;
     }
 
-    public static Stream<TaskModel> toModelStream(Collection<ListWithTask> listWithTaskCollection) {
-        return listWithTaskCollection.stream().map(TaskModel::toModel);
-    }
-
-    public static Stream<TaskModel> toModelStream(Stream<Task> taskStream) {
-        return taskStream.flatMap(task -> task.getListWithTasks().stream()).map(TaskModel::toModel);
-    }
-
-    public static List<TaskModel> toModelList(Collection<ListWithTask> listWithTaskCollection) {
-        return toModelStream(listWithTaskCollection).collect(Collectors.toList());
-    }
-
-    public static List<TaskModel> toModelList(Stream<Task> taskStream) {
-        return toModelStream(taskStream).collect(Collectors.toList());
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
     }
 
     @Override

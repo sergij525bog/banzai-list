@@ -31,7 +31,7 @@ public class ProductListResource implements BaseItemListResource<ProductList> {
     @Path("/{id}")
     @Override
     public Response getById(@PathParam("id") Long id) {
-        return applyFunction(service, s -> s.findProductListByIdJoinFetchProduct(id));
+        return applyFunction(service, s -> s.findByIdFetchProduct(id));
     }
 
     @POST
@@ -75,13 +75,13 @@ public class ProductListResource implements BaseItemListResource<ProductList> {
 
     // TODO: add redirect
     @PUT
-    @Path("/{id}/delete-product/{itemId}")
+    @Path("/{id}/delete-product/{listWithProductId}")
     @Transactional
     @Override
-    public Response deleteItem(@PathParam("id") Long listId, @PathParam("itemId") Long itemId) {
+    public Response deleteItem(@PathParam("id") Long listId, @PathParam("listWithProductId") Long listWithProductId) {
         return consumeOperation(
                 service,
-                s -> s.deleteProductFromList(listId, itemId),
+                s -> s.deleteProductFromList(listId, listWithProductId),
                 Response.Status.NO_CONTENT
         );
     }
@@ -94,22 +94,13 @@ public class ProductListResource implements BaseItemListResource<ProductList> {
     }
 
     @PATCH
-    @Path("/{listId}/products/{listWithProductId}/priority")
+    @Path("/{listId}/products/{listWithProductId}/change")
     public Response changePriority(
             @PathParam("listId") Long listId,
             @PathParam("listWithProductId") Long listWithProductId,
-            Priority priority) {
-        return consumeOperation(service, s -> s.changeProductPriority(listId, listWithProductId, priority));
-    }
-
-    @PATCH
-    @Path("/{listId}/products/{listWithProductId}/category")
-    public Response changeCategory(
-            @PathParam("listId") Long listId,
-            @PathParam("listWithProductId") Long listWithProductId,
-            ProductCategory category
-    ) {
-        return consumeOperation(service, s -> s.changeProductCategory(listId, listWithProductId, category));
+            @QueryParam("priority") Priority priority,
+            @QueryParam("category") ProductCategory category) {
+        return consumeOperation(service, s -> s.updateProductData(listId, listWithProductId, priority, category));
     }
 
     @PATCH
@@ -122,11 +113,11 @@ public class ProductListResource implements BaseItemListResource<ProductList> {
     }
 
     @PUT
-    @Path("/{listId}/products/{listWithProductId}/move")
+    @Path("/{listId}/products/{listWithProductId}/move/{newListId}")
     public Response moveToOtherList(
             @PathParam("listId") Long listId,
             @PathParam("listWithProductId") Long listWithProductId,
-            @QueryParam("newListId") Long newListId
+            @PathParam("newListId") Long newListId
     ) {
         return consumeOperation(service, s -> s.moveToOtherList(listId, listWithProductId, newListId));
     }

@@ -15,6 +15,7 @@ import org.oldman.entities.enums.TaskCategory;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Setter
 @Getter
@@ -22,7 +23,7 @@ import java.util.List;
 @Entity
 @Table(name = "lists_with_tasks")
 @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-public class ListWithTask {
+public class ListWithTask implements JoinData {
     @Id
     @GeneratedValue
     private Long id;
@@ -72,5 +73,18 @@ public class ListWithTask {
 //                ", done=" + done +
 //                ", calendarPlanning=" + calendarPlanning +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ListWithTask that = (ListWithTask) o;
+        return Objects.equals(id, that.id) && Objects.equals(task, that.task) && Objects.equals(taskList, that.taskList) && Objects.equals(description, that.description) && Objects.equals(startDate, that.startDate) && Objects.equals(endDate, that.endDate) && priority == that.priority && taskCategory == that.taskCategory && Objects.equals(calendarPlanning, that.calendarPlanning);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, task, taskList, description, startDate, endDate, priority, taskCategory, calendarPlanning);
     }
 }

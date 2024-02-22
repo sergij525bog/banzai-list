@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "lists_with_products")
 @JsonIdentityInfo(generator= ObjectIdGenerators.PropertyGenerator.class, property="id")
-public class ListWithProduct {
+public class ListWithProduct implements JoinData {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)

@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 class TaskQueryBuilder {
-    private static StringBuilder queryStringBuilder = new StringBuilder();
-    private Map<String, Object> params = new HashMap<>();
+    private static final StringBuilder queryStringBuilder = new StringBuilder();
+    private final Map<String, Object> params = new HashMap<>();
 
     public static StringBuilder getBasicQuery() {
         queryStringBuilder.append("select t from TaskList l ").append("join l.tasks t");

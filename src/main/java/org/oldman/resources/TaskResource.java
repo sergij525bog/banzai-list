@@ -1,6 +1,5 @@
 package org.oldman.resources;
 
-import io.quarkus.panache.common.Sort;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -10,6 +9,10 @@ import org.instancio.Instancio;
 import org.oldman.entities.Task;
 import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;
+import org.oldman.models.TaskDto;
+import org.oldman.repositories.bulders.*;
+import org.oldman.repositories.bulders.join.JoinData;
+import org.oldman.repositories.bulders.join.JoinDirector;
 import org.oldman.services.TaskService;
 
 import java.net.URI;
@@ -22,32 +25,45 @@ import static org.oldman.entities.entityUtils.ServiceOperationUtils.consumeOpera
 @Path("/tasks")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class TaskResource implements BaseItemResource<Task> {
+public class TaskResource {
     @Inject
     TaskService service;
 
     @GET
-    @Override
+//    @Override
     public Response getAll() {
 //        service.checkExists();
 //        System.out.println("Get all");
-        return applyFunction(service, TaskService::findAll);
+        QueryBuilder builder = new QueryBuilder();
+        TableInfo tableInfo = new TableInfo("Task", "t");
+
+        String query = builder.from(tableInfo)
+                .join(FieldInfo.createWithAlias("t.listWithTasks", "lwt"))
+                .joinOnFetch(new TableInfo("TaskList", "tl")).on(FieldInfo.createWithoutAlias("t.id"), FieldInfo.createWithoutAlias("tl.name"))
+                .leftJoinOnFetch(tableInfo).on(FieldInfo.createWithoutAlias("tl.name"), FieldInfo.createWithoutAlias("tl.name"))
+                .joinOn(tableInfo).on(FieldInfo.createWithoutAlias("lwt.task.id"), FieldInfo.createWithoutAlias("t.id"))
+                .where(FieldInfo.createWithoutAlias("t.name"), Operator.EQUAL, ":name")
+                .and(FieldInfo.createWithoutAlias( "t.id"), Operator.LESS_OR_EQUAL, ":id")
+                .build();
+        System.out.println(query);
+//        return applyFunction(service, TaskService::findAll);
+        return null;
     }
 
     @GET
     @Path("/{id}")
-    @Override
+//    @Override
     public Response getById(@PathParam("id") Long id) {
-        return applyFunction(service, s -> s.findById(id));
+        return applyFunction(service, s -> s.findDtoById(id));
     }
 
     @POST
     @Transactional
-    @Override
-    public Response create(@QueryParam("g") Boolean generate, Task task) {
+//    @Override
+    public Response create(@QueryParam("g") Boolean generate, TaskDto task) {
         if (generate != null && generate) {
             task = Instancio
-                    .of(Task.class)
+                    .of(TaskDto.class)
                     .ignore(field("id"))
                     .create();
         }
@@ -64,7 +80,7 @@ public class TaskResource implements BaseItemResource<Task> {
     @PUT
     @Path("/{id}")
     @Transactional
-    @Override
+//    @Override
     public Response update(@PathParam("id") Long id, @QueryParam("g") Boolean generate, Task task) {
         if (generate != null && generate) {
             task = Instancio
@@ -98,7 +114,7 @@ public class TaskResource implements BaseItemResource<Task> {
     @DELETE
     @Path("/{id}")
     @Transactional
-    @Override
+//    @Override
     public Response delete(@PathParam("id") Long id) {
         return consumeOperation(service, s -> s.delete(id), Response.Status.NO_CONTENT);
     }

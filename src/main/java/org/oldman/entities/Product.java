@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
 import org.oldman.entities.enums.ProductCategory;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -19,7 +20,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "products")
-public class Product implements Item {
+public class Product implements Item<ListWithProduct> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
@@ -48,5 +49,10 @@ public class Product implements Item {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    @Override
+    public Collection<ListWithProduct> getJoinTableData() {
+        return getListWithProducts();
     }
 }

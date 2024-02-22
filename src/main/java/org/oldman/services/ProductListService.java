@@ -12,8 +12,9 @@ import org.oldman.repositories.ListWithProductRepository;
 import org.oldman.repositories.ProductListRepository;
 import org.oldman.repositories.ProductRepository;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @ApplicationScoped
 public class ProductListService {
@@ -27,15 +28,15 @@ public class ProductListService {
     ProductRepository productRepository;
 
     public List<ProductList> findAll() {
-        return productListRepository.findAllProductListsJoinFetchProduct();
+        return productListRepository.findAllFetchProduct();
     }
 
     public ProductList findProductListById(Long id) {
         return productListRepository.findProductListById(id);
     }
 
-    public ProductList findProductListByIdJoinFetchProduct(Long id) {
-        return productListRepository.findProductListByIdJoinFetchProduct(id);
+    public ProductList findByIdFetchProduct(Long id) {
+        return productListRepository.findByIdFetchProduct(id);
     }
 
     @Transactional
@@ -54,20 +55,20 @@ public class ProductListService {
 
     @Transactional
     public void deleteProductList(Long id) {
-        final ProductList productList = findProductListByIdJoinFetchProduct(id);
+        productListRepository.checkExistsById(id);
         joinTableRepository.deleteAllByProductList(id);
-        productListRepository.delete(productList);
+        productListRepository.deleteById(id);
     }
 
     @Transactional
-    public void addProduct(long listId, long productId) {
-        final ProductList productList = productListRepository.findProductListByIdJoinFetchProduct(listId);
+    public void addProduct(Long listId, Long productId) {
+        final ProductList productList = productListRepository.findByIdFetchProduct(listId);
         final Product product = productRepository.findProductById(productId);
 
         final boolean listContainsProduct = productList
                 .getListWithProducts()
                 .stream()
-                .anyMatch(lp -> lp.getProduct().equals(product));
+                .anyMatch(lp -> lp.getProduct().getId().equals(productId));
 
         if (listContainsProduct) {
 //            throw new ConflictException("List already contains this task");
@@ -84,51 +85,31 @@ public class ProductListService {
     }
 
     @Transactional
-    public void deleteProductFromList(long listId, long productId) {
-        joinTableRepository.delete(getListWithProduct(listId, productId));
+    public void deleteProductFromList(Long listId, Long listWithProductId) {
+        joinTableRepository.delete(getListWithProduct(listId, listWithProductId));
     }
 
     @Transactional
-    public void clearList(long listId) {
-//        TODO: this line is only for validation list is in db. It should be replaced with less expensive operation
-        final ProductList list = findProductListById(listId);
+    public void clearList(Long listId) {
+        productListRepository.checkExistsById(listId);
 
         joinTableRepository.deleteAllByProductList(listId);
     }
 
     @Transactional
-    public void changeProductPriority(long listId, long productId, Priority priority) {
-        if (priority == null) {
-            throw new IllegalArgumentException("You don't pass a new priority");
+    public void updateProductData(Long listId, Long listWithProductId, Priority priority, ProductCategory category) {
+        if (priority == null && category == null) {
+            throw new IllegalArgumentException("You don't pass new product parameters");
         }
 
-        final ListWithProduct listWithProduct = getListWithProduct(listId, productId);
-        listWithProduct.setPriority(priority);
-    }
+        productListRepository.checkExistsById(listId);
+        joinTableRepository.checkContainedInList(listId, listWithProductId);
 
-    private ListWithProduct getListWithProduct(long listId, long productId) {
-        final ProductList productList = productListRepository.findProductListByIdJoinFetchProduct(listId);
-        final Product product = productRepository.findProductById(productId);
+        Map<String, Object> updateParams = new HashMap<>();
+        updateParams.put("taskCategory", category);
 
-        final Optional<ListWithProduct> listWithProduct = productList
-                .getListWithProducts()
-                .stream()
-                .filter(lp -> lp.getProduct().equals(product))
-                .findFirst();
-
-        if (listWithProduct.isEmpty()) {
-            throw new IllegalArgumentException("List does not contain product with id " + productId);
-        }
-        return listWithProduct.get();
-    }
-
-    public void changeProductCategory(Long listId, Long listWithProductId, ProductCategory category) {
-        if (category == null) {
-            throw new IllegalArgumentException("You don't pass a new category");
-        }
-
-        final ListWithProduct listWithProduct = getListWithProduct(listId, listWithProductId);
-        listWithProduct.getProduct().setProductCategory(category);
+        joinTableRepository.updateById(listWithProductId, updateParams);
+        productRepository.updateByListWithProduct(listWithProductId, category);
     }
 
     public void changeProductStatus(Long listId, Long listWithProductId) {
@@ -138,9 +119,22 @@ public class ProductListService {
 
     @Transactional
     public void moveToOtherList(Long listId, Long listWithProductId, Long newListId) {
-        final ListWithProduct listWithProduct = getListWithProduct(listId, listWithProductId);
-        final ProductList newList = productListRepository.findProductListByIdJoinFetchProduct(newListId);
-        listWithProduct.setProductList(newList);
-        newList.getListWithProducts().add(listWithProduct);
+        productListRepository.checkExistsById(listId);
+
+        if (listId.equals(newListId)) {
+            throw new IllegalArgumentException("You try to move product to the same list!");
+        }
+
+        productListRepository.checkExistsById(newListId);
+        joinTableRepository.checkExistsById(listWithProductId);
+        joinTableRepository.checkContainedInList(listId, listWithProductId);
+
+        joinTableRepository.moveToOtherList(listWithProductId, newListId);
+    }
+
+    private ListWithProduct getListWithProduct(Long listId, Long listWithProductId) {
+        productListRepository.checkExistsById(listId);
+
+        return joinTableRepository.findByIdAndList(listWithProductId, listId);
     }
 }

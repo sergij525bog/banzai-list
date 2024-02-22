@@ -21,7 +21,7 @@ public class ProductService {
         return productRepository.findAllProducts();
     }
 
-    public Product findById(Long id) {
+    public Product findById(long id) {
         return productRepository.findProductById(id);
     }
 
@@ -32,7 +32,7 @@ public class ProductService {
     }
 
     @Transactional
-    public void updateProduct(Long id, Product product) {
+    public void updateProduct(long id, Product product) {
         final Product entity = findById(id);
         //        EntityValidator.validateEntityBeforeSave(product);
         entity.setName(product.getName());
@@ -40,7 +40,7 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
+    public void deleteById(long id) {
         final Product entity = findById(id);
         joinTableRepository.deleteAllByProduct(id);
         productRepository.delete(entity);

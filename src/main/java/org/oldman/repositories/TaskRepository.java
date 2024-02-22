@@ -6,6 +6,7 @@ import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.oldman.entities.Task;
 import org.oldman.entities.entityUtils.EntityValidator;
+import org.oldman.models.TaskDto;
 
 import java.util.List;
 import java.util.Map;
@@ -17,10 +18,19 @@ public class TaskRepository implements PanacheRepository<Task> {
         return list("select t from Task t");
     }
 
-    public Task findTaskById(Long id) {
+    public Task findById(Long id) {
         final Task task = find("select t from Task t " +
                         "where t.id = :taskId",
                 Parameters.with("taskId", id))
+                .firstResult();
+        return EntityValidator.returnOrThrowIfNull(task, "There is no task with id " + id);
+    }
+
+    public TaskDto findDtoById(Long id) {
+        final TaskDto task = find("select t from Task t " +
+                        "where t.id = :taskId",
+                Parameters.with("taskId", id))
+                .project(TaskDto.class)
                 .firstResult();
         return EntityValidator.returnOrThrowIfNull(task, "There is no task with id " + id);
     }
@@ -40,13 +50,14 @@ public class TaskRepository implements PanacheRepository<Task> {
                 Parameters.with("listId", listId));
     }
 
-    public Task findByIdJoinFetchItemList(Long id) {
+    public Task findByIdJoinFetchTaskList(Long id) {
         final Task task = find("select t from Task t " +
                         "left join fetch t.listWithTasks lt " +
                         "left join fetch lt.taskList l " +
                         "where t.id = :taskId",
                 Parameters.with("taskId", id))
                 .firstResult();
+        System.out.println(task);
         return EntityValidator.returnOrThrowIfNull(task, "There is no task with id " + id);
     }
 
@@ -80,5 +91,4 @@ public class TaskRepository implements PanacheRepository<Task> {
     private Stream<Task> stream(QueryEditor editor) {
         return stream(editor.getQuery(), editor.getParameters());
     }
-
 }

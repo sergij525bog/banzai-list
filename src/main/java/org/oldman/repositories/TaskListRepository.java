@@ -18,20 +18,10 @@ public class TaskListRepository implements PanacheRepository<TaskList> {
     public List<TaskList> findAllTaskListsFetchTask() {
         return list("select distinct l from TaskList l " +
                 "left join fetch l.listWithTasks lt " +
-                "left join fetch lt.task t");
+                "join fetch lt.task");
     }
 
-    public TaskList findItemListByIdFetchTask(long id) {
-        final TaskList list = find("select l from TaskList l " +
-                        "left join fetch l.listWithTasks lt " +
-                        "left join fetch lt.task " +
-                        "where l.id = :listId",
-                Parameters.with("listId", id)
-        ).firstResult();
-        return EntityValidator.returnOrThrowIfNull(list, "There is no list with id " + id);
-    }
-
-    public TaskList findByIdFetchTask(long listId) {
+    public TaskList findByIdFetchTask(Long listId) {
         final TaskList list = find("select distinct l from TaskList l " +
                         "left join fetch l.listWithTasks lt " +
                         "left join fetch lt.task t " +
@@ -42,12 +32,19 @@ public class TaskListRepository implements PanacheRepository<TaskList> {
     }
 
     public void checkExistsById(Long id) {
-        Integer count = find("select count(*) from (select lt from TaskList lt where id = :id limit 1)",
-                Parameters.with("id", id))
-                .project(Integer.class)
-                .firstResult();
+//        Integer count = 0;
+//        try {
+//            count = find("select count(*) from (select lt from TaskList lt where id = :id limit 1)",
+//                    Parameters.with("id", id))
+//                    .project(Integer.class)
+//                    .firstResult();
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//        }
+        long count = count("id = :id", Parameters.with("id", id));
 
-        if (count > 0) {
+//        System.out.println(count);
+        if (count == 0L) {
             throw new NotFoundException("There is no list with id " + id);
         }
     }

@@ -1,4 +1,7 @@
 package org.oldman.entities;
 
-public interface Item extends DataObject {
+import java.util.Collection;
+
+public interface Item<J extends JoinData> extends DataObject {
+    Collection<J> getJoinTableData();
 }

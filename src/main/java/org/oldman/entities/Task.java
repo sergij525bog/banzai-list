@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -22,7 +23,7 @@ import java.util.Set;
 @Entity
 @Table(name = "tasks")
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
-public class Task implements Item {
+public class Task implements Item<ListWithTask> {
     @Id
     @GeneratedValue
     private Long id;
@@ -43,6 +44,10 @@ public class Task implements Item {
                 '}';
     }
 
+    public static void print() {
+        System.out.println("Hello");
+    }
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -57,5 +62,10 @@ public class Task implements Item {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    @Override
+    public Collection<ListWithTask> getJoinTableData() {
+        return getListWithTasks();
     }
 }
