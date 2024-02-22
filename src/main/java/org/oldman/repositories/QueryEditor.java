@@ -32,6 +32,47 @@ class QueryEditor {
         return null;
     }
 
+    public static QueryEditor getEditor(String query, Parameters parameters, String tableAlias, final Map<String, Object> updateParams) {
+        if (updateParams == null || updateParams.isEmpty()) {
+            return null;
+        }
+
+        QueryEditor editor = new QueryEditor(query, parameters, tableAlias);
+        return editor.addUpdating(updateParams);
+    }
+
+    private QueryEditor addUpdating(final Map<String, Object> updateParams) {
+        this.addUpdateParameters(updateParams);
+        this.addUpdateStringToQuery(updateParams);
+
+        return this;
+    }
+
+    //        "lt.priority = :priority"
+    private void addUpdateStringToQuery(Map<String, Object> updateParams) {
+        StringBuilder updateString = new StringBuilder(query);
+        int i = 0;
+        for (var param: updateParams.keySet()) {
+            i++;
+            updateString
+                    .append(" ")
+                    .append(tableAlias)
+                    .append(".")
+                    .append(param)
+                    .append(" = :")
+                    .append(param)
+                    .append(i < updateParams.size() ? ", " : " ");
+        }
+
+        System.out.println(updateString);
+
+        query = updateString.toString();
+    }
+
+    private void addUpdateParameters(Map<String, Object> updateParams) {
+        updateParams.forEach((key, value) -> parameters = parameters.and(key, value));
+    }
+
     private QueryEditor addFiltering(final Map<String, Object> filters) {
         this.addFilterParameters(filters);
         this.addFilterStringToQuery(filters);
@@ -61,9 +102,7 @@ class QueryEditor {
     }
 
     private void addFilterParameters(final Map<String, Object> filters) {
-        for (var filter : filters.entrySet()) {
-            parameters = parameters.and(filter.getKey(), filter.getValue());
-        }
+        filters.forEach((key, value) -> parameters = parameters.and(key, value));
     }
 
     private void addSortingToQuery(final List<String> sortBy, String sortOrder) {
