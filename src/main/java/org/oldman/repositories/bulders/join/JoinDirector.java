@@ -1,7 +1,7 @@
 package org.oldman.repositories.bulders.join;
 
-import org.oldman.repositories.bulders.FieldInfo;
-import org.oldman.repositories.bulders.TableInfo;
+import org.oldman.repositories.bulders.pojo.FieldInfo;
+import org.oldman.repositories.bulders.pojo.TableInfo;
 
 public class JoinDirector {
     public static JoinData createJoinByCollection(FieldInfo fieldInfo) {

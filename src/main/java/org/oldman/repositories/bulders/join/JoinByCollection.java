@@ -1,6 +1,6 @@
 package org.oldman.repositories.bulders.join;
 
-import org.oldman.repositories.bulders.FieldInfo;
+import org.oldman.repositories.bulders.pojo.FieldInfo;
 
 class JoinByCollection implements JoinData {
     private final FieldInfo fieldInfo;
@@ -10,7 +10,7 @@ class JoinByCollection implements JoinData {
     }
 
     public JoinByCollection(String tableAliasWithCollection, String collectionAlias) {
-        this.fieldInfo = FieldInfo.createWithAlias(tableAliasWithCollection, collectionAlias);
+        this.fieldInfo = FieldInfo.withAlias(tableAliasWithCollection, collectionAlias);
     }
 
     @Override
@@ -22,7 +22,7 @@ class JoinByCollection implements JoinData {
                 fieldInfo.getFieldAlias();
     }
 
-    public static class JoinByCollectionBuilder implements JoinDataBuilder {
+    static class JoinByCollectionBuilder implements JoinDataBuilder {
         private FieldInfo fieldInfo;
 
         public JoinByCollectionBuilder fieldInfo(FieldInfo fieldInfo) {

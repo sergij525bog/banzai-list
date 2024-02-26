@@ -1,5 +1,8 @@
 package org.oldman.repositories.bulders.join;
 
+import org.oldman.repositories.bulders.join.enums.FetchType;
+import org.oldman.repositories.bulders.join.enums.JoinType;
+
 public class JoinClause {
     private final JoinData joinData;
     private final JoinType joinType;
@@ -19,8 +22,7 @@ public class JoinClause {
     }
 
     public String buildJoinClause() {
-        return "\n" +
-                joinType.getJoinType() +
+        return joinType.getJoinType() +
                 fetchType.getFetchType() +
                 " " +
                 joinData.buildJoinData();

@@ -1,4 +1,4 @@
-package org.oldman.repositories.bulders.join;
+package org.oldman.repositories.bulders.join.enums;
 
 public enum FetchType {
     FETCH("fetch"),

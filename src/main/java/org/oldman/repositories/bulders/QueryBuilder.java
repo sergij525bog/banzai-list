@@ -1,19 +1,27 @@
 package org.oldman.repositories.bulders;
 
-import org.oldman.repositories.bulders.join.*;
-
-import java.util.*;
+import org.oldman.repositories.bulders.join.JoinData;
+import org.oldman.repositories.bulders.join.JoinDirector;
+import org.oldman.repositories.bulders.join.enums.FetchType;
+import org.oldman.repositories.bulders.join.enums.JoinType;
+import org.oldman.repositories.bulders.pojo.FieldInfo;
+import org.oldman.repositories.bulders.pojo.TableInfo;
+import org.oldman.repositories.bulders.where.Operator;
 
 public class QueryBuilder {
     private TableInfo fromTable;
-    private final List<JoinClause> joinClauses = new ArrayList<>();
-    private final List<WhereData> whereClauses = new ArrayList<>();
-    private final List<String> groupingByClauses = new ArrayList<>();
-    private TableInfo tempTableInfo;
-    private FetchType tempFetchType;
-    private JoinType tempJoinType;
 
-    private WhereClauseBuilder whereClauseBuilder;
+    private IWhereClauseBuilder whereClauseBuilder;
+    private final JoinClauseBuilder joinClauseBuilder = new JoinClauseBuilder();
+    private JoinTempInfo joinTempInfo;
+    private final SelectClauseBuilder selectClauseBuilder = new SelectClauseBuilder();
+    private int limit = -1;
+    private int offset = -1;
+
+    public QueryBuilder select(String selectString) {
+        selectClauseBuilder.select(selectString);
+        return this;
+    }
 
     public QueryBuilder from(TableInfo tableInfo) {
         fromTable = tableInfo;
@@ -69,28 +77,6 @@ public class QueryBuilder {
         return joinOn(tableInfo, JoinType.RIGHT_JOIN, FetchType.FETCH);
     }
 
-    private JoinPart joinOn(TableInfo tableInfo, JoinType joinType, FetchType fetchType) {
-        storeTempInfo(tableInfo, joinType, fetchType);
-        return new JoinPart(this);
-    }
-
-    private void storeTempInfo(TableInfo tableInfo, JoinType joinType, FetchType fetchType) {
-        tempTableInfo = tableInfo;
-        tempJoinType = joinType;
-        tempFetchType = fetchType;
-    }
-
-    private void clearTempInfo() {
-        tempTableInfo = null;
-        tempJoinType = null;
-        tempFetchType = null;
-    }
-
-    private QueryBuilder join(JoinData joinData, JoinType joinType, FetchType fetchType) {
-        joinClauses.add(JoinClause.createJoinClause(joinData, joinType, fetchType));
-        return this;
-    }
-
     public QueryBuilder join(FieldInfo collectionField) {
         return join(collectionField, JoinType.JOIN, FetchType.NONE);
     }
@@ -116,39 +102,97 @@ public class QueryBuilder {
     }
 
     private QueryBuilder join(FieldInfo fieldInfo, JoinType joinType, FetchType fetchType) {
-        return join(JoinDirector.createJoinByCollection(fieldInfo), joinType, fetchType);
+        joinClauseBuilder.join(JoinDirector.createJoinByCollection(fieldInfo), joinType, fetchType);
+        return this;
+    }
+
+    private JoinPart joinOn(TableInfo tableInfo, JoinType joinType, FetchType fetchType) {
+        storeTempInfo(tableInfo, joinType, fetchType);
+        return new JoinPart(joinClauseBuilder, this);
+    }
+
+    private void storeTempInfo(TableInfo tableInfo, JoinType joinType, FetchType fetchType) {
+        joinTempInfo = new JoinTempInfo(tableInfo, joinType, fetchType);
+    }
+
+    public QueryBuilder limit(int limit) {
+        if (limit < 0 ) {
+            throw new IllegalArgumentException("Limit cannot be less than 0");
+        }
+        this.limit = limit;
+        return this;
+    }
+
+    public QueryBuilder offset(int offset) {
+        if (offset < 0 ) {
+            throw new IllegalArgumentException("Limit cannot be less than 0");
+        }
+        this.offset = offset;
+        return this;
+    }
+
+    private void clearTempInfo() {
+        joinTempInfo = null;
+    }
+
+    private String buildLimitIfExists() {
+        return buildIntFieldClause("limit", limit);
+    }
+
+    private String buildOffsetIfExists() {
+        return buildIntFieldClause("offset", offset);
+    }
+
+    private String buildIntFieldClause(String clause, int intField) {
+        if (intField >= 0) {
+            return " " + clause + " " + intField;
+        }
+        return "";
     }
 
     public String build() {
         String alias = fromTable.getAlias();
-        StringBuilder builder = new StringBuilder("select " + alias);
-        builder.append(" from ")
-                .append(fromTable.getTable())
-                .append(" ")
-                .append(alias);
-        appendJoinClauses(builder);
-        builder.append("\n");
-        builder.append(whereClauseBuilder.buildWhereQueryPart());
 
-        return builder.toString();
-    }
-
-    private void appendJoinClauses(StringBuilder builder) {
-        joinClauses.forEach(joinClause -> builder.append(joinClause.buildJoinClause()));
+        return "select " + alias + " from " +
+                fromTable.getTable() +
+                " " +
+                alias +
+                joinClauseBuilder.buildQueryPart() +
+                "\n" +
+                whereClauseBuilder.buildQueryPart() +
+                buildLimitIfExists() +
+                buildOffsetIfExists();
     }
 
     public static class JoinPart {
-        private final QueryBuilder builder;
+        private final JoinClauseBuilder builder;
+        private final QueryBuilder queryBuilder;
 
-        JoinPart(QueryBuilder builder) {
+        JoinPart(JoinClauseBuilder builder, QueryBuilder queryBuilder) {
             this.builder = builder;
+            this.queryBuilder = queryBuilder;
         }
 
         public QueryBuilder on(FieldInfo firstField, FieldInfo secondField) {
-            JoinData joinByTwoTables = JoinDirector.createJoinByTwoTables(firstField, secondField, builder.tempTableInfo);
-            builder.join(joinByTwoTables, builder.tempJoinType, builder.tempFetchType);
-            builder.clearTempInfo();
-            return builder;
+            JoinData joinByTwoTables = JoinDirector.createJoinByTwoTables(firstField, secondField, queryBuilder.joinTempInfo.tempTableInfo);
+
+            builder.join(joinByTwoTables, queryBuilder.joinTempInfo.tempJoinType, queryBuilder.joinTempInfo.tempFetchType);
+
+            queryBuilder.clearTempInfo();
+
+            return queryBuilder;
+        }
+    }
+
+    private static class JoinTempInfo {
+        private final TableInfo tempTableInfo;
+        private final JoinType tempJoinType;
+        private final FetchType tempFetchType;
+
+        private JoinTempInfo(TableInfo tempTableInfo, JoinType tempJoinType, FetchType tempFetchType) {
+            this.tempTableInfo = tempTableInfo;
+            this.tempJoinType = tempJoinType;
+            this.tempFetchType = tempFetchType;
         }
     }
 }

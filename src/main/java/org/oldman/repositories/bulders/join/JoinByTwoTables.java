@@ -1,7 +1,7 @@
 package org.oldman.repositories.bulders.join;
 
-import org.oldman.repositories.bulders.FieldInfo;
-import org.oldman.repositories.bulders.TableInfo;
+import org.oldman.repositories.bulders.pojo.FieldInfo;
+import org.oldman.repositories.bulders.pojo.TableInfo;
 
 class JoinByTwoTables implements JoinData {
     private final FieldInfo firstField;
@@ -29,7 +29,7 @@ class JoinByTwoTables implements JoinData {
                 secondField.getField();
     }
 
-    public static class JoinByTwoTablesBuilder implements JoinDataBuilder {
+    static class JoinByTwoTablesBuilder implements JoinDataBuilder {
         private FieldInfo firstField;
         private FieldInfo secondField;
         private TableInfo secondTable;

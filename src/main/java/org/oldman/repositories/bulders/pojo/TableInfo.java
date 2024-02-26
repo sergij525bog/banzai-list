@@ -1,6 +1,6 @@
-package org.oldman.repositories.bulders;
+package org.oldman.repositories.bulders.pojo;
 
-public class TableInfo {
+public final class TableInfo {
     private final String table;
     private final String alias;
 

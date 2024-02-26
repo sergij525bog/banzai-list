@@ -14,6 +14,9 @@ import java.util.stream.Stream;
 
 @ApplicationScoped
 public class TaskRepository implements PanacheRepository<Task> {
+    public List<Task> projectTest() {
+        return null;
+    }
     public List<Task> findAllTasks() {
         return list("select t from Task t");
     }

@@ -1,5 +1,9 @@
 package org.oldman.repositories.bulders;
 
+import org.oldman.repositories.bulders.pojo.FieldInfo;
+import org.oldman.repositories.bulders.where.Operator;
+import org.oldman.repositories.bulders.where.WhereType;
+
 final class WhereData {
     private final FieldInfo fieldInfo;
     private final Operator operator;

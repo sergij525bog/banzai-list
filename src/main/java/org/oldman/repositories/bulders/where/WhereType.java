@@ -1,4 +1,4 @@
-package org.oldman.repositories.bulders;
+package org.oldman.repositories.bulders.where;
 
 public enum WhereType {
     WHERE("where"),

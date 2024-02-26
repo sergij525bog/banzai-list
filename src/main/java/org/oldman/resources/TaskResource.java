@@ -11,8 +11,9 @@ import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;
 import org.oldman.models.TaskDto;
 import org.oldman.repositories.bulders.*;
-import org.oldman.repositories.bulders.join.JoinData;
-import org.oldman.repositories.bulders.join.JoinDirector;
+import org.oldman.repositories.bulders.pojo.FieldInfo;
+import org.oldman.repositories.bulders.pojo.TableInfo;
+import org.oldman.repositories.bulders.where.Operator;
 import org.oldman.services.TaskService;
 
 import java.net.URI;
@@ -38,13 +39,15 @@ public class TaskResource {
         TableInfo tableInfo = new TableInfo("Task", "t");
 
         String query = builder.from(tableInfo)
-                .join(FieldInfo.createWithAlias("t.listWithTasks", "lwt"))
-                .joinOnFetch(new TableInfo("TaskList", "tl")).on(FieldInfo.createWithoutAlias("t.id"), FieldInfo.createWithoutAlias("tl.name"))
-                .leftJoinOnFetch(tableInfo).on(FieldInfo.createWithoutAlias("tl.name"), FieldInfo.createWithoutAlias("tl.name"))
-                .joinOn(tableInfo).on(FieldInfo.createWithoutAlias("lwt.task.id"), FieldInfo.createWithoutAlias("t.id"))
-                .where(FieldInfo.createWithoutAlias("t.name"), Operator.EQUAL, ":name")
-                .and(FieldInfo.createWithoutAlias( "t.id"), Operator.LESS_OR_EQUAL, ":id")
+                .join(FieldInfo.withAlias("t.listWithTasks", "lwt"))
+                .joinOnFetch(new TableInfo("TaskList", "tl")).on(FieldInfo.withoutAlias("t.id"), FieldInfo.withoutAlias("tl.name"))
+                .leftJoinOnFetch(tableInfo).on(FieldInfo.withoutAlias("tl.name"), FieldInfo.withoutAlias("tl.name"))
+                .joinOn(tableInfo).on(FieldInfo.withoutAlias("lwt.task.id"), FieldInfo.withoutAlias("t.id"))
+                .where(FieldInfo.withoutAlias("t.name"), Operator.EQUAL, ":name")
+                .and(FieldInfo.withoutAlias( "t.id"), Operator.LESS_OR_EQUAL, ":id")
                 .build();
+        String apply = Operator.EQUAL.apply(FieldInfo.withoutAlias("t.id"), 5);
+//        System.out.println(apply);
         System.out.println(query);
 //        return applyFunction(service, TaskService::findAll);
         return null;
