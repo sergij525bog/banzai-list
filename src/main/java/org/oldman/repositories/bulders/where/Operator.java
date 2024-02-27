@@ -2,9 +2,6 @@ package org.oldman.repositories.bulders.where;
 
 import org.oldman.repositories.bulders.pojo.FieldInfo;
 
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
-
 public enum Operator {
     EQUAL("="),
     NOT_EQUAL("<>"),
@@ -23,7 +20,7 @@ public enum Operator {
         return operator;
     }
 
-    public String apply(FieldInfo field, Object value) {
-        return field.tableAliasWithField() + " " + operator + " " + value.toString();
+    public String apply(FieldInfo field, String value) {
+        return field.tableAliasWithField() + " " + operator + " " + value;
     }
 }

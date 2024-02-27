@@ -10,7 +10,7 @@ import org.oldman.entities.Task;
 import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;
 import org.oldman.models.TaskDto;
-import org.oldman.repositories.bulders.*;
+import org.oldman.repositories.bulders.QueryBuilder;
 import org.oldman.repositories.bulders.pojo.FieldInfo;
 import org.oldman.repositories.bulders.pojo.TableInfo;
 import org.oldman.repositories.bulders.where.Operator;
@@ -35,22 +35,7 @@ public class TaskResource {
     public Response getAll() {
 //        service.checkExists();
 //        System.out.println("Get all");
-        QueryBuilder builder = new QueryBuilder();
-        TableInfo tableInfo = new TableInfo("Task", "t");
-
-        String query = builder.from(tableInfo)
-                .join(FieldInfo.withAlias("t.listWithTasks", "lwt"))
-                .joinOnFetch(new TableInfo("TaskList", "tl")).on(FieldInfo.withoutAlias("t.id"), FieldInfo.withoutAlias("tl.name"))
-                .leftJoinOnFetch(tableInfo).on(FieldInfo.withoutAlias("tl.name"), FieldInfo.withoutAlias("tl.name"))
-                .joinOn(tableInfo).on(FieldInfo.withoutAlias("lwt.task.id"), FieldInfo.withoutAlias("t.id"))
-                .where(FieldInfo.withoutAlias("t.name"), Operator.EQUAL, ":name")
-                .and(FieldInfo.withoutAlias( "t.id"), Operator.LESS_OR_EQUAL, ":id")
-                .build();
-        String apply = Operator.EQUAL.apply(FieldInfo.withoutAlias("t.id"), 5);
-//        System.out.println(apply);
-        System.out.println(query);
-//        return applyFunction(service, TaskService::findAll);
-        return null;
+        return applyFunction(service, TaskService::findAll);
     }
 
     @GET

@@ -6,7 +6,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.instancio.Instancio;
-import org.oldman.entities.Task;
 import org.oldman.entities.TaskList;
 import org.oldman.entities.enums.Priority;
 import org.oldman.entities.enums.TaskCategory;

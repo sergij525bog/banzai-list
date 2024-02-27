@@ -4,7 +4,6 @@ import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.NotFoundException;
-import org.oldman.entities.ListWithProduct;
 import org.oldman.entities.ListWithTask;
 import org.oldman.entities.entityUtils.EntityValidator;
 

@@ -2,10 +2,8 @@ package org.oldman.repositories.bulders;
 
 import org.oldman.repositories.bulders.join.JoinClause;
 import org.oldman.repositories.bulders.join.JoinData;
-import org.oldman.repositories.bulders.join.JoinDirector;
 import org.oldman.repositories.bulders.join.enums.FetchType;
 import org.oldman.repositories.bulders.join.enums.JoinType;
-import org.oldman.repositories.bulders.pojo.FieldInfo;
 
 import java.util.ArrayList;
 import java.util.List;

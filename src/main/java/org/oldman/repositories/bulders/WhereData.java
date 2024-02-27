@@ -20,12 +20,6 @@ final class WhereData {
     public String buildWhereClause() {
         return whereType.getWhereType() +
                 " " +
-                fieldInfo.getTableAlias() +
-                "." +
-                fieldInfo.getField() +
-                " " +
-                operator.getOperator() +
-                " " +
-                parameterString;
+                operator.apply(fieldInfo, parameterString);
     }
 }
